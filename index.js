@@ -4,8 +4,6 @@
  **/
 
 var inputs = readline().split(' ')
-const INIT_X = 7
-const INIT_Y = 7
 const _width = parseInt(inputs[0])
 const _height = parseInt(inputs[1])
 const myId = parseInt(inputs[2])
@@ -18,27 +16,19 @@ var cell = {}
 
 function set_table()
 {
-
-    // use POS strategy.. put some attributes into it
-
-    let lines
-    for (let y = 0; y < _height; x++) {
-        const line = readline()
-        lines.push(line)
-    }
-
-    for (x = 0; x <_width;x++)
+    for (x = 0; x < _width; x++)
     {
-        const line = readline()
+        let line = []
         for (let y = 0; y < _height; y++)
         {
+            let tile = lines[x][y]
             let pos = {}
-            let tile = lines[y]
+            
             pos.x = x
             pos.y = y
             pos.tile = tile
-            line.push(pos)
             
+            line.push(pos)
         }
         table.push(line)
     }
@@ -46,31 +36,22 @@ function set_table()
 
 function is_valid_pos(x, y)
 {
-    console.error('table')
-    let col = table[x]
-    let cell = col[y]
-
-    if (cell === 'x')
-        return true
-    return false
+    if (x < 0 || x >= _width)
+        return false
+    if (y < 0 || y >= _height)
+        return false
+    
+    let cell = table[x][y]
+    console.log(cell)
+    if (cell.tile === 'x' || cell.tile === 'v')
+        return false
+    return true
 }
-
 
 function get_table_pos(x, y)
 {
-    let col = table[x]
-    let pos = col[y]
-
+    let pos = table[x][y]
     return pos
-}
-
-function out_of_table(x, y)
-{
-    if (x < 0 || x > _width)
-        return true
-    if (y < 0 || y > _height)
-        return true
-    return false
 }
 
 function clear_visited_positions()
@@ -79,12 +60,10 @@ function clear_visited_positions()
     {
         for (let y = 0; j < _height; j++)
         {
-
             let pos = get_table_pos(x, y)
 
             if (pos === 'v')
                 pos = '.'
-
         }
     }
 }
@@ -96,14 +75,7 @@ function clear_visited_positions()
 
 function has_where_to_move()
 {
-    return get_possible_moves().length == 0
-}
-
-function have_visited_before(x, y)
-{
-    if (table[x][y] != 'v')
-        return true
-    return false
+    return get_possible_moves().length > 0
 }
 
 
@@ -119,18 +91,11 @@ var radar = {}
 function set_visited_pos
 {
     let pos = get_table_pos(my_pos.x, my_pos.y)
-    pos = 'v'
+    pos.tile ='v'
 }
 
 function find_possibles_moves()
 {
-    let possible_moves = []
-
-    my_pos.x = 0
-    my_pos.y = 0
-
-// -------------------------------------------------------------
-
     let fixed_init_x
     let fixed_end_x
 
@@ -144,10 +109,6 @@ function find_possibles_moves()
     else
         fixed_end_x = my_pos.x+1
 
-
-    let fixed_init_x
-    let fixed_end_x
-
 // -------------------------------------------------------------
 
     let fixed_init_y
@@ -158,8 +119,8 @@ function find_possibles_moves()
     else
         fixed_init_y = my_pos.y-1
 
-    if (my_pos.y == _width)
-        fixed_end_y = _width
+    if (my_pos.y == _height)
+        fixed_end_y = _height
     else
         fixed_end_y = my_pos.x+1
 
@@ -167,22 +128,20 @@ function find_possibles_moves()
     
     let possible_moves = []
 
-    for (let x = fixed_init_x; x < fixed_end_x; x++)
+    for (let x = fixed_init_x; x < fixed_end_x+1; x++)
     {
-        for (let y = my_pos.y-1; y < fixed_end_y; y++)
+        for (let y = fixed_init_y; y < fixed_end_y+1; y++)
         {
-
-            let cell = table[x][y]
-
-            if (cell === '.')
-                possible_moves.push_back(cell)
-
+            if(is_valid_pos(x, y))
+            {
+                let pos = get_table_pos(x,y)
+                possible_moves.push(pos)
+            }
         }
     }
 
     return possible_moves
 }
-
 
 
 // #############################################################################
@@ -200,6 +159,14 @@ function translate_opponents_orderes(opponent_order)
 // #############################################################################
 // --------------------------- INIT GAME ------------------------------------>
 
+
+let lines = []
+for (let i = 0; i < _height; i++) {
+    const line = readline();
+    lines[i] = line
+}
+
+set_table()
 
 function set_turn_info()
 {
