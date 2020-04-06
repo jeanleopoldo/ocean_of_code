@@ -16,7 +16,6 @@ for (let i = 0; i < _height; i++) {
 //   <-------------------------------------  TABLE  ------------------------------------------------>
 // ####################################################################################################
 var table = []
-var cell = {}
 
 function set_table()
 {
@@ -28,13 +27,14 @@ function set_table()
             let tile = lines[x][y]
             let pos = {}
             
-            pos.x = x
-            pos.y = y
+            pos.x = y
+            pos.y = x
             pos.tile = tile
             line.push(pos)
         }
         table.push(line)
     }
+    console.error(table)
 }
 
 function is_valid_pos(x, y)
@@ -67,14 +67,17 @@ function get_table_pos(x, y)
 
 function clear_visited_positions()
 {
+    console.error('clearing visited pos')
     for (let x = 0; x < _width; x++)
     {
         for (let y = 0; y < _height; y++)
         {
             let pos = get_table_pos(x, y)
 
-            if (pos.tile === 'v')
+            if (pos.tile === 'v') {
                 pos.tile = '.'
+                console.error(pos)
+            }
         }
     }
 }
@@ -150,12 +153,13 @@ function find_possible_moves()
         {
             if(is_valid_pos(x, y))
             {
-                //check if it pos has not been added yet
                 let pos = get_table_pos(x,y)
                 possible_moves.push(pos)
             }
         }
     }
+
+    //console.error(possible_moves)
 
     return possible_moves
 }
@@ -194,6 +198,7 @@ function set_turn_info()
     my_pos.x = parseInt(inputs[0])
     my_pos.y = parseInt(inputs[1])
     my_life = parseInt(inputs[2])
+    
     set_visited_pos()
     
     radar.torpedo_cooldown = parseInt(inputs[4])
@@ -217,8 +222,6 @@ while (true) {
     set_turn_info()
 
     let action = get_selected_action()
-    console.error(find_possible_moves())
-    console.error(table)
     console.log(action);
     turn++;
 }
@@ -258,7 +261,7 @@ function get_selected_action()
     if(!has_where_to_move())
         return surface()
     
-    let moved_pos = find_possible_moves()[find_possible_moves().length-1]
+    let moved_pos = find_possible_moves()[0]
     let direction = get_direction_move(moved_pos)
     let action = move(direction)
 
