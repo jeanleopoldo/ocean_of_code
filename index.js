@@ -1,16 +1,20 @@
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
 
 var inputs = readline().split(' ')
-const _width = parseInt(inputs[0])
-const _height = parseInt(inputs[1])
+var _width = parseInt(inputs[0])
+var _height = parseInt(inputs[1])
 const myId = parseInt(inputs[2])
 
-// #############################################################################
-// -------------  TABLE  -----------------------
+// given table
+let lines = []
+for (let i = 0; i < _height; i++) {
+    const line = readline();
+    lines[i] = line
+}
 
+
+// ####################################################################################################
+//   <-------------------------------------  TABLE  ------------------------------------------------>
+// ####################################################################################################
 var table = []
 var cell = {}
 
@@ -27,7 +31,6 @@ function set_table()
             pos.x = x
             pos.y = y
             pos.tile = tile
-            
             line.push(pos)
         }
         table.push(line)
@@ -36,13 +39,21 @@ function set_table()
 
 function is_valid_pos(x, y)
 {
+    // validates if is out of table's reach
     if (x < 0 || x >= _width)
         return false
     if (y < 0 || y >= _height)
         return false
-    
+
+    // validates if it does note move diagonally
+    if(!(x == my_pos.x || y==my_pos.y))
+        return false
+
+    // validates if has moved to that tile yet or if it is an island
+    // x = island
+    // v = visited
+    // . - sea
     let cell = table[x][y]
-    console.log(cell)
     if (cell.tile === 'x' || cell.tile === 'v')
         return false
     return true
@@ -58,47 +69,52 @@ function clear_visited_positions()
 {
     for (let x = 0; x < _width; x++)
     {
-        for (let y = 0; j < _height; j++)
+        for (let y = 0; y < _height; y++)
         {
             let pos = get_table_pos(x, y)
 
-            if (pos === 'v')
-                pos = '.'
+            if (pos.tile === 'v')
+                pos.tile = '.'
         }
     }
 }
 
 
-// #############################################################################
-// <---------------------------  PEOPLE  -------------------------------------->
+// ####################################################################################################
+//   <-------------------------  PEOPLE  ------------------------------------>
+// ####################################################################################################
 
 
 function has_where_to_move()
 {
-    return get_possible_moves().length > 0
+    return find_possible_moves().length > 0
 }
 
 
-// #############################################################################
-// <-----------------------------  ME  ---------------------------------------->
+// ####################################################################################################
+//   <---------------------------  ME  -------------------------------------->
+// ####################################################################################################
 
 
-var init_pos = '7 7'
 var my_life;
 var my_pos = {}
+var next_pos = '3 3'
 var radar = {}
 
-function set_visited_pos
+function set_visited_pos()
 {
     let pos = get_table_pos(my_pos.x, my_pos.y)
     pos.tile ='v'
 }
 
-function find_possibles_moves()
+function find_possible_moves()
 {
     let fixed_init_x
     let fixed_end_x
 
+
+//gotta make it better one day.. haha
+// -------------------------------------------------------------
     if (my_pos.x == 0)
         fixed_init_x = 0
     else
@@ -134,6 +150,7 @@ function find_possibles_moves()
         {
             if(is_valid_pos(x, y))
             {
+                //check if it pos has not been added yet
                 let pos = get_table_pos(x,y)
                 possible_moves.push(pos)
             }
@@ -144,35 +161,40 @@ function find_possibles_moves()
 }
 
 
-// #############################################################################
-// <--------------------------  ENEMY --------------------------------------->
+// ####################################################################################################
+//   <-------------------------------------  ENEMY ------------------------------------------------->
+// ####################################################################################################
 
 
 var enemy_life
 var opponents_orders
 
+// not implemented
 function translate_opponents_orderes(opponent_order)
 {
-
+    return opponent_order
 }
 
-// #############################################################################
-// --------------------------- INIT GAME ------------------------------------>
 
+// ####################################################################################################
+//   <------------------------------------- INIT GAME ---------------------------------------------->
+// ####################################################################################################
 
-let lines = []
-for (let i = 0; i < _height; i++) {
-    const line = readline();
-    lines[i] = line
-}
 
 set_table()
+
+
+// ####################################################################################################
+//   <-------------------------------------  GAME  ------------------------------------------------->
+// ####################################################################################################
+
 
 function set_turn_info()
 {
     my_pos.x = parseInt(inputs[0])
     my_pos.y = parseInt(inputs[1])
     my_life = parseInt(inputs[2])
+    set_visited_pos()
     
     radar.torpedo_cooldown = parseInt(inputs[4])
     radar.sonar_cooldown = parseInt(inputs[5])
@@ -184,29 +206,73 @@ function set_turn_info()
     opponents_orders = translate_opponents_orderes(readline())
 }
 
-
-// #############################################################################
-// ----------------------------  GAME  -------------------------------------->
-
-
 var turn = 0
 
-set_table()
+// initial position
+console.log(next_pos)
 
-console.log(init_pos)
 while (true) {
-    
-    //to get where it cannot go
+
     var inputs = readline().split(' ')
     set_turn_info()
-    //------------------------------------------------------------
 
-    console.log(init_pos);
+    let action = get_selected_action()
+    console.error(find_possible_moves())
+    console.error(table)
+    console.log(action);
     turn++;
 }
 
-// ------------------- TOOLS  -----------------------------------------
+
+// ####################################################################################################
+//   <----------------------------  TOOLS  ---------------------------------->
+// ####################################################################################################
+
+
 function get_formatted_pos(x, y)
 {
     return x+' '+y
+}
+
+
+// ####################################################################################################
+//   <-------------------------------------  ACTION  ------------------------------------------------->
+// ####################################################################################################
+
+function move(direction)
+{
+    let move = 'MOVE ' + direction
+    return move
+}
+
+function surface()
+{
+    clear_visited_positions()
+    return 'SURFACE'
+}
+
+
+// not implemented yet!
+function get_selected_action()
+{
+    if(!has_where_to_move())
+        return surface()
+    
+    let moved_pos = find_possible_moves()[find_possible_moves().length-1]
+    let direction = get_direction_move(moved_pos)
+    let action = move(direction)
+
+    return action
+}
+
+function get_direction_move(moved_pos)
+{
+    if (moved_pos.x > my_pos.x)
+        return 'W'
+    if (moved_pos.x < my_pos.x)
+        return 'E'
+    if (moved_pos.y > my_pos.y)
+        return 'N'
+    if (moved_pos.y < my_pos.y)
+        return 'S'
 }
