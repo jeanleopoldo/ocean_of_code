@@ -34,7 +34,6 @@ function set_table()
         }
         table.push(line)
     }
-    console.error(table)
 }
 
 function is_valid_pos(x, y)
@@ -46,16 +45,19 @@ function is_valid_pos(x, y)
         return false
 
     // validates if it does note move diagonally
-    if(!(x == my_pos.x || y==my_pos.y))
+    if(!(x == my_pos.x || y == my_pos.y))
         return false
 
     // validates if has moved to that tile yet or if it is an island
     // x = island
     // v = visited
     // . - sea
+
     let cell = table[x][y]
     if (cell.tile === 'x' || cell.tile === 'v')
         return false
+    if (cell.tile === '.')
+        return true
     return true
 }
 
@@ -67,16 +69,15 @@ function get_table_pos(x, y)
 
 function clear_visited_positions()
 {
-    console.error('clearing visited pos')
     for (let x = 0; x < _width; x++)
     {
         for (let y = 0; y < _height; y++)
         {
             let pos = get_table_pos(x, y)
 
-            if (pos.tile === 'v') {
+            if (pos.tile === 'v')
+            {
                 pos.tile = '.'
-                console.error(pos)
             }
         }
     }
@@ -84,24 +85,13 @@ function clear_visited_positions()
 
 
 // ####################################################################################################
-//   <-------------------------  PEOPLE  ------------------------------------>
-// ####################################################################################################
-
-
-function has_where_to_move()
-{
-    return find_possible_moves().length > 0
-}
-
-
-// ####################################################################################################
-//   <---------------------------  ME  -------------------------------------->
+//   <----------------------------------------  ME  ------------------------------------------------>
 // ####################################################################################################
 
 
 var my_life;
 var my_pos = {}
-var next_pos = '3 3'
+var next_pos = {}
 var radar = {}
 
 function set_visited_pos()
@@ -159,8 +149,6 @@ function find_possible_moves()
         }
     }
 
-    //console.error(possible_moves)
-
     return possible_moves
 }
 
@@ -187,6 +175,28 @@ function translate_opponents_orderes(opponent_order)
 
 set_table()
 
+function find_init_pos()
+{
+    let possible_init_pos = []
+
+    for (let x = 0; x < _width; x++)
+    {
+        for (let y = 0; y < _height; y++)
+        {
+            let pos = get_table_pos(x,y)
+
+            if (pos.tile === '.') {
+                possible_init_pos.push(pos)
+            }
+        }
+    }
+    return possible_init_pos
+}
+
+let poss_init_pos = find_init_pos()
+let s = poss_init_pos.length
+let found_pos = poss_init_pos[Math.floor(s/2)]
+let init_pos = get_formatted_pos(found_pos)
 
 // ####################################################################################################
 //   <-------------------------------------  GAME  ------------------------------------------------->
@@ -214,7 +224,7 @@ function set_turn_info()
 var turn = 0
 
 // initial position
-console.log(next_pos)
+console.log(init_pos)
 
 while (true) {
 
@@ -228,18 +238,18 @@ while (true) {
 
 
 // ####################################################################################################
-//   <----------------------------  TOOLS  ---------------------------------->
+//   <--------------------------------------  TOOLS  ----------------------------------------------->
 // ####################################################################################################
 
 
-function get_formatted_pos(x, y)
+function get_formatted_pos(pos)
 {
-    return x+' '+y
+    return pos.x+' '+pos.y
 }
 
 
 // ####################################################################################################
-//   <-------------------------------------  ACTION  ------------------------------------------------->
+//   <-------------------------------------  ACTION  ----------------------------------------------->
 // ####################################################################################################
 
 function move(direction)
@@ -258,10 +268,14 @@ function surface()
 // not implemented yet!
 function get_selected_action()
 {
-    if(!has_where_to_move())
+
+    let possible_moves = find_possible_moves()
+    let has_where_to_move =(possible_moves.length > 0)
+    
+    if(!has_where_to_move)
         return surface()
     
-    let moved_pos = find_possible_moves()[0]
+    let moved_pos = possible_moves[0]
     let direction = get_direction_move(moved_pos)
     let action = move(direction)
 
